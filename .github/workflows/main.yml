@@ -1,0 +1,43 @@
+name: Sync Fork
+
+on:
+  schedule:
+    - cron: '*/5 * * * *' # 每小时运行一次，你可以根据需要调整时间
+
+jobs:
+  sync:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout the repository
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ github.head_ref }}
+
+    - name: Fetch all branches from upstream
+      run: git fetch upstream
+
+    - name: Checkout default branch
+      run: git checkout ${GITHUB_REF##*/}
+
+    - name: Pull changes from upstream default branch
+      run: git pull upstream ${GITHUB_REF##*/}
+
+    - name: Push changes to GitHub
+      run: git push
+
+    - name: Sync all branches
+      run: |
+        for branch in $(git branch -r | grep upstream/ | grep -v HEAD | grep -v master); do
+          git branch --track ${branch#upstream/} $branch
+        done
+        git fetch --all
+        git pull --all
+        git push --all
+      env:
+        GIT_PUSH_FORCE: true
+        GIT_AUTHOR_NAME: vikaptain
+        GIT_AUTHOR_EMAIL: vikaptain@gmail.com
+        GIT_COMMITTER_NAME: vikaptain
+        GIT_COMMITTER_EMAIL: vikaptain@gmail.com

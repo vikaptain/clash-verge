@@ -16,7 +16,7 @@ jobs:
         ref: ${{ github.head_ref }}
 
     - name: Fetch all branches from upstream
-      run: git fetch upstream
+      run: git fetch upstream https://github.com/zzzgydi/clash-verge.git
 
     - name: Checkout default branch
       run: git checkout ${GITHUB_REF##*/}
